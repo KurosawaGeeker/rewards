@@ -2,13 +2,13 @@ from django.shortcuts import render,get_list_or_404,get_object_or_404
 from django.http import HttpResponse,HttpResponseRedirect,Http404
 from .models import Question,Choice
 from django.urls import reverse
-
+from django.utils import timezone
 from django.template import loader
 
-
 def index(request):
-    latest_question_list = Question.objects.order_by('-pub_date')[:5]
+    latest_question_list = list(Question.objects.filter(pub_date__lte=timezone.now()).order_by('-pub_date')[:5])
     #template = loader.get_template('polls/index.html')
+    #pub_date__lte = timezone()时间小于当前时间，或者等于当前时间。
     context = {#传递上下文，将模板当中的变量，映射为python的对象
         'latest_question_list':latest_question_list,
     }
@@ -17,18 +17,11 @@ def index(request):
 
 
 def detail(request,question_id):
-    # try:
-    #     #     question = Question.objects.get(pk=question_id)
-    #     #     context = {
-    #     #         'question':question
-    #     #     }
-    #     # except Question.DoesNotExist:
-    #     #     raise Http404("Question does not exist")
     question = get_object_or_404(Question, pk=question_id)
-    context = {
-        'question':question
-    }
-    return render(request, 'polls/detail.html',context)
+    if question.pub_date <= timezone.now():
+        return render(request, 'polls/detail.html',{'question': question})
+    else:
+        return HttpResponse("你所访问的页面不存在",status=404)
 
 
 def results(request, question_id):
@@ -48,8 +41,6 @@ def vote(request, question_id):
     else:
         selected_choice.votes += 1
         selected_choice.save()
-        return HttpResponseRedirect(reverse('polls:results', args=(question.id,)))
-
-
+        return HttpResponseRedirect(reverse('polls:results', args=(question_id,)))
 
 
