@@ -24,7 +24,7 @@ def detail(request,reward_id,):
     data['title'] = reward.reward_title
     data['text'] = reward.reward_text
     data['prize'] = reward.prize
-    data['position'] = reward.position
+    data['position'] = reward.positio
     data['publisher'] = reward.publisher.name
     data['tel'] = reward.publisher.tel
     data['view_count'] = reward.view_count
